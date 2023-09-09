@@ -1,0 +1,46 @@
+1. 	SELECT * 
+	FROM employees
+
+2. 	SELECT COUNT(employee_id) 
+	FROM employees 
+	WHERE job_title = 'Manager'
+
+3. 	SELECT name, salary 
+	FROM employees 
+	WHERE department = 'Sales' OR department = 'Marketing'
+
+4. 	SELECT AVG(salary) 
+	FROM employees 
+	WHERE joined_date >= CURRENT_DATE - INTERVAL '5' YEAR AND joined_date < CURRENT_DATE;
+
+5. 	SELECT emp.name, SUM(sales) AS sales 
+	FROM employees AS emp
+	JOIN sales_data AS sal ON emp.employee_id = sal.employee_id
+	GROUP BY emp.employee_id 
+	ORDER BY sales DESC LIMIT 5
+
+6.	SELECT NAME, salary, department
+	FROM employees
+	WHERE salary > ALL ( SELECT AVG(salary) FROM employees GROUP BY department);
+
+7.	SELECT NAME, SUM(sales) AS total_sales
+	FROM employees
+	JOIN sales_data ON employees.employee_id = sales_data.employee_id
+	GROUP BY NAME
+	ORDER BY total_sales DESC
+
+8.	DELIMITER $$
+ 
+	CREATE PROCEDURE memberDepartment
+	(
+		memberDpt VARCHAR(50)
+	)
+	BEGIN
+	    SELECT NAME, salary 
+	    FROM employees
+	    WHERE department = memberDpt;
+	END$$
+	
+	DELIMITER ;
+
+	CALL memberDepartment("Sales")
