@@ -15,12 +15,6 @@ use App\Models\{Order, OrderProduct};
 
 class OrderController extends Controller
 {
-
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => ['login']]);
-    }
-    
     private function _handleUpload($get_image) 
     {
         $time = strtotime(date(now())) * 1000;
