@@ -13,11 +13,11 @@ use App\Models\{Product, ProductAddOn};
 
 class ProductController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => ['login']]);
-    }
-    
+    // public function __construct()
+    // {
+    //     $this->middleware('auth:api', ['except' => ['login']]);
+    // }
+
     private function _handleUpload($get_image) {
         $time = strtotime(date(now())) * 1000;
         $image_ = explode(',', $get_image);

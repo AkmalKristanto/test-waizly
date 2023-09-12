@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use JWTAuth;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use App\Models\{Logging};
 use Tymon\JWTAuth\Http\Middleware\BaseMiddleware;
 
 class JwtMiddleware extends BaseMiddleware
@@ -21,6 +23,25 @@ class JwtMiddleware extends BaseMiddleware
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
+            $response = $next($request);
+            
+            $log = [
+                'URI' => $request->getUri(),
+                'METHOD' => $request->getMethod(),
+                'REQUEST_BODY' => $request->all(),
+                'RESPONSE' => $response->getContent()
+            ];
+            Log::info(json_encode($log));
+
+            $save_log = [
+                'url' => $request->getUri(),
+                'method' => $request->getMethod(),
+                'request_body' => json_encode($request->all()),
+                'response' => $response->getContent(),
+                'user_agent' => $request->header('user-agent')
+            ];
+            Logging::create($save_log);
+
         } catch (Exception $e) {
             // dd($e);
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException){

@@ -12,7 +12,7 @@ Route::group([], function () {
 });
 
 /*General Middleware*/
-Route::group(['middleware' => 'log.route'], function () {
+Route::group(['middleware' => 'jwt.verify'], function () {
    Route::post('logout', 'UserController@logout');
    Route::get('me', 'UserController@me');
 
