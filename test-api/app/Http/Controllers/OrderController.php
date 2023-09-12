@@ -6,6 +6,7 @@ use App\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\{OrderRequest};
 use App\Http\Transformers\Result;
+use App\Http\Helpers\{LogUser};
 use DB;
 use Storage;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -36,7 +37,7 @@ class OrderController extends Controller
     {
         try {
             $user = auth()->user();
-            $id_user = $user->id;
+            $id_user = $user->id_user;
             $category_time = $request->get('category_time');
             $search = $request->get('search');
             $start_date = $request->start_date;
@@ -93,6 +94,9 @@ class OrderController extends Controller
                                         })
                                         ->paginate($per_page)->withQueryString();
 
+            $feature = "Get List Order";
+            $log = LogUser::log_user_update($id_user, $feature);
+            
             return ListOrderResource::collection($get_pesanan);
         } catch (\Throwable $th) {
             return Result::error($th, 'Terjadi kesalahan saat memuat data');
@@ -104,7 +108,7 @@ class OrderController extends Controller
         try {
             $user = auth()->user();
             $id_order = $request->get('id_order');
-            $id_user = $user->id;
+            $id_user = $user->id_user;
 
             $get_pesanan = Order::where('order.id_order', $id_order)
                                 ->selectRaw("order.id_order, no_transaction, name_order, type_order, payment_method, order.amount, tax, service, order.total_amount ,order.created_at")
@@ -123,6 +127,9 @@ class OrderController extends Controller
             } else {
                 $get_pesanan['payment_method'] = 'Other';
             }
+            
+            $feature = "Detail Order - ".$id_order;
+            $log = LogUser::log_user_update($id_user, $feature);
 
             return Result::response($get_pesanan, 'Data Berhasil Didapatkan.');
         } catch (\Throwable $th) {
@@ -190,6 +197,10 @@ class OrderController extends Controller
                     DB::rollback();
                     return Result::response(array(), $e->getMessage(), 400, false);
                 }
+
+                $feature = "Create Order - ".$id_order;
+                $log = LogUser::log_user_update($id_user, $feature);
+
                 return Result::response($create_order, 'Data Berhasil Disimpan.');
             
             }else{

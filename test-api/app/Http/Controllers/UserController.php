@@ -6,6 +6,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Transformers\Result;
+use App\Http\Helpers\{LogUser};
 use Illuminate\Support\Facades\Validator;
 use JWTAuth;
 use DB;
@@ -27,7 +28,7 @@ class UserController extends Controller
             if($user == null){
                 return Result::error(array(), 'Akun Tidak Ditemukan');
             }
-            $id_user = $user->id;
+            $id_user = $user->id_user;
             
             $userdata['email'] = $user->email;
             $userdata['password'] = $password;
@@ -58,6 +59,9 @@ class UserController extends Controller
                 'email' => $user->email,
                 'token_user' => $token
             ];
+            
+            $feature = "Login";
+            $log = LogUser::log_user_update($id_user, $feature);
 
             return Result::response($ret, 'Login Berhasil Dilakukan');
         } catch (\Throwable $th) {
@@ -90,6 +94,11 @@ class UserController extends Controller
                 DB::rollback();
                 return Result::response(array(), $e->getMessage(), 400, false);
             }
+
+            $id_user = $user->id_user;
+            $feature = "Register";
+            $log = LogUser::log_user_update($id_user, $feature);
+
             return Result::response($user, 'Register Berhasil Dilakukan');
         } catch (\Throwable $th) {
             return Result::error($th, 'Terjadi kesalahan saat memuat data');
@@ -117,10 +126,15 @@ class UserController extends Controller
     {
         try {
             $user = auth()->user();
+            $id_user = $user->id_user;
             $update = [
                 'token_user' => 0,
             ];
-            $save = User::where('id_user', $user->id_user)->update($update);
+            $save = User::where('id_user', $id_user)->update($update);
+
+            $feature = "Logout";
+            $log = LogUser::log_user_update($id_user, $feature);
+
             JWTAuth::invalidate(JWTAuth::getToken());
             return Result::response(array(), 'Logout Berhasil');
         } catch(\JWTException $e) {
@@ -141,7 +155,7 @@ class UserController extends Controller
     public function upload_image_profile(Request $request)
     {
         $user = auth()->user();
-        $id_user = $user->id;
+        $id_user = $user->id_user;
         
         $get_image = $request->url_img;
         
@@ -168,6 +182,9 @@ class UserController extends Controller
 
         $update_img = User::where('id_user', $id_user)
                             ->update($req);
+
+        $feature = "Upload Image";
+        $log = LogUser::log_user_update($id_user, $feature);
 
         return Result::response(array(), 'Data Berhasil Disimpan.');
     }

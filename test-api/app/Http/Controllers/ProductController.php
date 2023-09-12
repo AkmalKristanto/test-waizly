@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\{ProductRequest};
+use App\Http\Helpers\{LogUser};
 use App\Http\Transformers\Result;
 use Illuminate\Support\Facades\DB;
 use Storage;
@@ -54,6 +55,8 @@ class ProductController extends Controller
 
             $get_product = $get_product->paginate($per_page)
                                     ->withQueryString();
+            $feature = "Get List Product";
+            $log = LogUser::log_user_update($id_user, $feature);
 
             return Result::response($get_product, 'Data Berhasil Didapatkan.');
         } catch (\Throwable $th) {
@@ -78,6 +81,9 @@ class ProductController extends Controller
                                 ])
                                 ->first();
 
+            $feature = "Detail Product - ".$id_product;
+            $log = LogUser::log_user_update($id_user, $feature);
+                    
             return Result::response($detail_product, 'Data Berhasil Didapatkan.');
         } catch (\Throwable $th) {
             return Result::error($th, 'Terjadi kesalahan saat memuat data');
@@ -134,6 +140,9 @@ class ProductController extends Controller
                 DB::rollback();
                 return Result::response(array(), $e->getMessage(), 400, false);
             }
+
+            $feature = "Create Product - ".$id_product;
+            $log = LogUser::log_user_update($id_user, $feature);
 
             return Result::response(array(), 'Data Berhasil Disimpan.');
         } catch (\Throwable $th) {
@@ -212,6 +221,10 @@ class ProductController extends Controller
                 DB::rollback();
                 return Result::response(array(), $e->getMessage(), 400, false);
             }
+
+            $feature = "Update Product - ".$id_product;
+            $log = LogUser::log_user_update($id_user, $feature);
+
             return Result::response(array(), 'Data Berhasil Diupdate.');
         } catch (\Throwable $th) {
             return Result::error($th, 'Terjadi kesalahan saat memuat data');
